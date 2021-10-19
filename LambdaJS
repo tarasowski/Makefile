@@ -1,0 +1,9 @@
+FN_NAME := "BookingDBTriggerProd"
+
+pack:
+	zip -r lambda.zip ./*
+
+deploy: pack
+	aws lambda update-function-code --function-name $(FN_NAME) --zip-file fileb://lambda.zip
+
+
