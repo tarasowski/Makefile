@@ -1,0 +1,35 @@
+REPOSITORY_NAME := tokenized-devops-jobs
+
+# load .envs so the exported variables are available here
+include ~/.env/uploadcv
+
+# load aws credentials and pass as envs
+AWS_ACCESS_KEY_ID=$(shell aws --profile uploadcv configure get aws_access_key_id)
+AWS_SECRET_ACCESS_KEY=$(shell aws --profile uploadcv configure get aws_secret_access_key)
+
+
+docker-run:
+	docker run \
+	-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
+	-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
+	-e UPLOADCV_TOKENIZED_JOBS_DB=$(UPLOADCV_TOKENIZED_JOBS_DB)
+	-e UPLOADCV_REGION=eu-central-1 process-cv:latest
+
+create-repository:
+	 aws ecr create-repository --repository-name $(REPOSITORY_NAME) --image-scanning-configuration scanOnPush=true
+
+docker-deploy:
+	 docker tag $(REPOSITORY_NAME):latest 147688792645.dkr.ecr.eu-central-1.amazonaws.com/$(REPOSITORY_NAME):latest
+	 aws ecr get-login-password | docker login --username AWS --password-stdin 147688792645.dkr.ecr.eu-central-1.amazonaws.com
+	 docker push 147688792645.dkr.ecr.eu-central-1.amazonaws.com/$(REPOSITORY_NAME):latest
+
+
+test:
+	echo $(UPLOADCV_TOKENIZED_JOBS_DB)
+
+
+
+
+
+
+
