@@ -1,0 +1,15 @@
+FN_NAME := "RetrieveParkosReservationsProd"
+
+install:
+	pip3 install --target ./package -r requirements.txt
+
+pack:
+	cd ./package && touch signature.txt && zip -r9 ../function.zip . && cd ..
+
+add:
+	zip -g function.zip main.py
+
+deploy: install pack add
+	aws lambda update-function-code --function-name $(FN_NAME) --zip-file fileb://function.zip
+
+
